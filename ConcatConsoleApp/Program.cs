@@ -9,19 +9,27 @@ namespace ConcatConsoleApp
 {
     class Program
     {
+        /// /// /// /// /// /// /// ///
+
         static readonly string FirstFilePath  = Path.Combine(AppContext.BaseDirectory, @"file1.txt");   // путь к первому файлу
         static readonly string SecondFilePath = Path.Combine(AppContext.BaseDirectory, @"file2.txt");   // путь ко второму файлу
         static readonly string ResultFilePath = Path.Combine(AppContext.BaseDirectory, @"result.txt");  // путь к выходному файлу
+
         const int LENGTH_OF_FILE = 200000; // Максимальное количество строк во временном файле
+
         const bool USE_TEST_DATA = true;   // Использование тестового набора данных (Int32)
+        const int FIRST_TEST_FILE_LENGTH = 10000000; // Размер первого тестового набора данных
+        const int SECOND_TEST_FILE_LENGTH = 10000000; // Размер втоорго тестового набора данных
+
+        /// /// /// /// /// /// /// ///
         static void Main(string[] args)
         {
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
             if (USE_TEST_DATA)
             {
-                Fill(FirstFilePath, count: 10000000);
-                Fill(SecondFilePath, count: 10000000);
+                Fill(FirstFilePath,  FIRST_TEST_FILE_LENGTH);
+                Fill(SecondFilePath, SECOND_TEST_FILE_LENGTH);
                 Console.WriteLine($"Тестовые данные созданы. Время на создание: {stopwatch.Elapsed}");
             }
 
@@ -135,6 +143,7 @@ namespace ConcatConsoleApp
         /// <param name="inPath">Путь к файлу</param>
         public static void WriteFileBlocks(string inPath)
         {
+            string filename = inPath.Substring(inPath.LastIndexOf('\\')+1);
             if (!File.Exists(inPath)) { throw new FileNotFoundException(); }
             using(StreamReader sr = new StreamReader(inPath))
             {
@@ -156,7 +165,7 @@ namespace ConcatConsoleApp
                     else
                     {
                         longs.Sort();
-                        using(StreamWriter sw = new StreamWriter($"{inPath.Replace(".txt", String.Empty)}_{fileCounter}.dat"))
+                        using(StreamWriter sw = new StreamWriter(Path.Combine(AppContext.BaseDirectory, $"{filename.Replace(".txt", String.Empty)}_{fileCounter}.dat")))
                         {
                             longs.ForEach(o => sw.WriteLine(o));
                         }
@@ -169,7 +178,7 @@ namespace ConcatConsoleApp
                 if(longs.Count > 0)
                 {
                     longs.Sort();
-                    using (StreamWriter sw = new StreamWriter($"{inPath.Replace(".txt", String.Empty)}_{fileCounter++}.dat"))
+                    using (StreamWriter sw = new StreamWriter(Path.Combine(AppContext.BaseDirectory, $"{filename.Replace(".txt", String.Empty)}_{fileCounter}.dat")))
                     {
                         longs.ForEach(o => sw.WriteLine(o));
                     }
