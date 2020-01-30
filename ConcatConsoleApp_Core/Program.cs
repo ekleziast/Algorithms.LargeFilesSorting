@@ -15,33 +15,38 @@ namespace ConcatConsoleApp_Core
         static readonly string SecondFilePath = Path.Combine(AppContext.BaseDirectory, @"file2.txt");   // путь ко второму файлу
         static readonly string ResultFilePath = Path.Combine(AppContext.BaseDirectory, @"result.txt");  // путь к выходному файлу
 
-        const int LENGTH_OF_FILE = 300000; // Максимальное количество строк во временном файле
+        const int LENGTH_OF_FILE = 500000; // Максимальное количество строк во временном файле
 
-        const bool USE_TEST_DATA = true;   // Использование тестового набора данных (Int32)
-        const int FIRST_TEST_FILE_LENGTH = 20000000; // Размер первого тестового набора данных
-        const int SECOND_TEST_FILE_LENGTH = 20000000; // Размер втоорго тестового набора данных
+        const bool USE_TEST_DATA = false;   // Использование тестового набора данных (Int32)
+        const int FIRST_TEST_FILE_LENGTH = 10000000; // Размер первого тестового набора данных
+        const int SECOND_TEST_FILE_LENGTH = 10000000; // Размер втоорго тестового набора данных
 
         /// /// /// /// /// /// /// ///
         static void Main(string[] args)
         {
-            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
             if (USE_TEST_DATA)
             {
-                Fill(FirstFilePath, FIRST_TEST_FILE_LENGTH);
-                Fill(SecondFilePath, SECOND_TEST_FILE_LENGTH);
+                Task.WaitAll(new Task[] { 
+                    FillAsync(FirstFilePath, FIRST_TEST_FILE_LENGTH), 
+                    FillAsync(SecondFilePath, SECOND_TEST_FILE_LENGTH) 
+                });
                 Console.WriteLine($"Тестовые данные созданы. Время на создание: {stopwatch.Elapsed}");
             }
 
             RemoveFile(ResultFilePath);
 
-            System.Diagnostics.Stopwatch stopwatchWritingBlocks = new System.Diagnostics.Stopwatch();
+            var stopwatchWritingBlocks = new System.Diagnostics.Stopwatch();
             stopwatchWritingBlocks.Start();
-            Task.WaitAll(new Task[] { WriteFileBlocksAsync(FirstFilePath), WriteFileBlocksAsync(SecondFilePath) });
+            Task.WaitAll(new Task[] { 
+                WriteFileBlocksAsync(FirstFilePath), 
+                WriteFileBlocksAsync(SecondFilePath) 
+            });
             stopwatchWritingBlocks.Stop();
             Console.WriteLine($"Файлы разбиты на части. Время на разбитие: {stopwatchWritingBlocks.Elapsed}");
 
-            System.Diagnostics.Stopwatch stopwatchConcat = new System.Diagnostics.Stopwatch();
+            var stopwatchConcat = new System.Diagnostics.Stopwatch();
             stopwatchConcat.Start();
             ConcatFiles(ResultFilePath);
             stopwatchConcat.Stop();
@@ -115,19 +120,21 @@ namespace ConcatConsoleApp_Core
         /// </summary>
         /// <param name="path">Путь к файлу</param>
         /// <param name="count">Количество случайных чисел</param>
-        public static void Fill(string path, int count = 1000000)
+        public static Task FillAsync(string path, int count = 1000000)
         {
-            RemoveFile(path);
-            using (StreamWriter sw = new StreamWriter(path, append: true))
-            {
-                Random rnd = new Random();
-                int value;
-                for (int i = 0; i < count; i++)
+            return Task.Run(() => {
+                RemoveFile(path);
+                using (StreamWriter sw = new StreamWriter(path, append: true))
                 {
-                    value = rnd.Next(Int32.MinValue, Int32.MaxValue);
-                    sw.WriteLine(value);
+                    Random rnd = new Random();
+                    int value;
+                    for (int i = 0; i < count; i++)
+                    {
+                        value = rnd.Next(Int32.MinValue, Int32.MaxValue);
+                        sw.WriteLine(value);
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -144,9 +151,9 @@ namespace ConcatConsoleApp_Core
         /// Автоматически сортирует строки файла по возрастанию.
         /// </summary>
         /// <param name="inPath">Путь к файлу</param>
-        public static async Task WriteFileBlocksAsync(string inPath)
+        public static Task WriteFileBlocksAsync(string inPath)
         {
-            await Task.Run(() => {
+            return Task.Run(() => {
                 string filename = inPath.Substring(inPath.LastIndexOf('\\') + 1);
                 if (!File.Exists(inPath)) { throw new FileNotFoundException(); }
                 using (StreamReader sr = new StreamReader(inPath))
