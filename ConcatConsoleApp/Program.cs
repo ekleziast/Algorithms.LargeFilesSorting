@@ -11,11 +11,11 @@ namespace ConcatConsoleApp
     {
         /// /// /// /// /// /// /// ///
 
-        static readonly string FirstFilePath  = Path.Combine(AppContext.BaseDirectory, @"file1.txt");   // путь к первому файлу
+        static readonly string FirstFilePath = Path.Combine(AppContext.BaseDirectory, @"file1.txt");   // путь к первому файлу
         static readonly string SecondFilePath = Path.Combine(AppContext.BaseDirectory, @"file2.txt");   // путь ко второму файлу
         static readonly string ResultFilePath = Path.Combine(AppContext.BaseDirectory, @"result.txt");  // путь к выходному файлу
 
-        const int LENGTH_OF_FILE = 200000; // Максимальное количество строк во временном файле
+        const int LENGTH_OF_FILE = 300000; // Максимальное количество строк во временном файле
 
         const bool USE_TEST_DATA = true;   // Использование тестового набора данных (Int32)
         const int FIRST_TEST_FILE_LENGTH = 10000000; // Размер первого тестового набора данных
@@ -90,17 +90,17 @@ namespace ConcatConsoleApp
                 {
                     int pos = ints.IndexOf(ints.Min());
                     sw.WriteLine(ints[pos]);
-                    ints.RemoveAt(pos);
 
                     string line = readers[pos].ReadLine();
                     if(line != null)
                     {
-                        ints.Insert(pos, Int64.Parse(line));
+                        ints[pos] = Int64.Parse(line);
                     }
                     else
                     {
                         readers[pos].Dispose();
                         readers.RemoveAt(pos);
+                        ints.RemoveAt(pos);
                     }
                 }
             }
@@ -153,11 +153,7 @@ namespace ConcatConsoleApp
                 int fileCounter = 0;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    long longLine;
-                    if (!Int64.TryParse(line, out longLine)) // На всякий случай проверяем строку на Int64
-                    {
-                        continue;
-                    }
+                    long longLine = Int64.Parse(line);
                     if (longs.Count != LENGTH_OF_FILE)
                     {
                         longs.Add(longLine);
