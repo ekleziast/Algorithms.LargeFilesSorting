@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ConcatConsoleApp_Core
@@ -28,9 +27,9 @@ namespace ConcatConsoleApp_Core
             stopwatch.Start();
             if (USE_TEST_DATA)
             {
-                Task.WaitAll(new Task[] { 
-                    FillAsync(FirstFilePath, FIRST_TEST_FILE_LENGTH), 
-                    FillAsync(SecondFilePath, SECOND_TEST_FILE_LENGTH) 
+                Task.WaitAll(new Task[] {
+                    FillAsync(FirstFilePath, FIRST_TEST_FILE_LENGTH),
+                    FillAsync(SecondFilePath, SECOND_TEST_FILE_LENGTH)
                 });
                 Console.WriteLine($"Тестовые данные созданы. Время на создание: {stopwatch.Elapsed}");
             }
@@ -39,9 +38,9 @@ namespace ConcatConsoleApp_Core
 
             var stopwatchWritingBlocks = new System.Diagnostics.Stopwatch();
             stopwatchWritingBlocks.Start();
-            Task.WaitAll(new Task[] { 
-                WriteFileBlocksAsync(FirstFilePath), 
-                WriteFileBlocksAsync(SecondFilePath) 
+            Task.WaitAll(new Task[] {
+                WriteFileBlocksAsync(FirstFilePath),
+                WriteFileBlocksAsync(SecondFilePath)
             });
             stopwatchWritingBlocks.Stop();
             Console.WriteLine($"Файлы разбиты на части. Время на разбитие: {stopwatchWritingBlocks.Elapsed}");
@@ -122,7 +121,8 @@ namespace ConcatConsoleApp_Core
         /// <param name="count">Количество случайных чисел</param>
         public static Task FillAsync(string path, int count = 1000000)
         {
-            return Task.Run(() => {
+            return Task.Run(() =>
+            {
                 RemoveFile(path);
                 using (StreamWriter sw = new StreamWriter(path, append: true))
                 {
@@ -153,7 +153,8 @@ namespace ConcatConsoleApp_Core
         /// <param name="inPath">Путь к файлу</param>
         public static Task WriteFileBlocksAsync(string inPath)
         {
-            return Task.Run(() => {
+            return Task.Run(() =>
+            {
                 string filename = inPath.Substring(inPath.LastIndexOf('\\') + 1);
                 if (!File.Exists(inPath)) { throw new FileNotFoundException(); }
                 using (StreamReader sr = new StreamReader(inPath))
